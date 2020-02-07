@@ -1,0 +1,66 @@
+// Simple struct that we're going to serialize/deserialize
+struct Person
+{
+       std::string name, surname;
+       int age;
+};
+
+// Macro that opens/closes conversion namespace
+SSVJ_CNV_NAMESPACE()
+{
+       // Macro that defines a converter for Person
+       // 'mV' is the name of the variable that will refer to the JSON value
+       // 'mX' is the name of the variable that will refer to the Person value
+       SSVJ_CNV(Person, mV, mX)
+       {
+           // Converting a Person to JSON simply writes/reads a JSON array
+           // containing its name, surname and age
+           ssvj::cnvArr(mV, mX.name, mX.surname, mX.age);
+       }
+       SSVJ_CNV_END()
+}
+SSVJ_CNV_NAMESPACE_END()
+
+int main()
+{
+       // Initialize a JSON array
+       ssvj::Val people{ssvj::Arr{}}; 
+
+       // Emplace C++ objects in the JSON array
+       people.emplace<Person>("John", "Doe", 35);
+       people.emplace<Person>("Bill", "Gates", 75);
+
+       // Get copies of the C++ objects from the JSON array
+       auto johnDoe(people[0].as<Person>());
+       auto billGates(people[1].as<Person>());
+
+       // Modify the copy and put it back into the JSON array
+       billGates.age = 50;    
+       people[1] = billGates;
+
+       assert(people[1][0].as<std::string>() == "Bill");
+       assert(people[1][1].as<std::string>() == "Gates");
+       assert(people[1][2].as<int>() == 50);
+
+       // Iterate every item of the array as a 'Person'
+       for(const auto& p : people.forArrAs<Person>())
+       {
+           std::cout << "Name: " << p.name << "\n"
+                     << "Surname: " << p.surname << "\n"
+                     << "Age: " << p.age << "\n\n";
+       }
+
+       // Write and read from file
+       people.writeToFile("/tmp/people.json");
+       auto people2(ssvj::Val::fromFile("/tmp/people.json"));
+
+       assert(people == people2); 
+}
+
+
+
+
+
+Make sure it's at least 15 characters OR at least 8 characters including a number and a lowercase letter. Learn more.
+
+Email preferences

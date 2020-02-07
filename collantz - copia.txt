@@ -1,0 +1,77 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Services;
+
+
+//using System.Data;
+//using System.Data.SqlClient;
+
+namespace WebServiceCollatz
+{
+    [WebService(Namespace = "http://tempuri.org/")]
+    [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
+    [System.ComponentModel.ToolboxItem(false)]
+    // To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line. 
+    // [System.Web.Script.Services.ScriptService]
+    int numero;
+   // estructura del Json
+   auto const targets = std::vector<game::Target>{
+      {.name = "collantz",  .level = 12, .location = {3.4, 5.6, 0.5}, .achieved = false}
+ //     {.name = "treasure", .level = 0,  .location = {7.8, 3.2, 5.0}, .achieved = true},
+ //     {.name = "leader",   .level = 15, .location = {9.4, 2.1, 2.6}, .achieved = false},
+ //     {.name = "soldier",  .level = 10, .location = {1.0, 8.9, 1.0}, .achieved = true},
+ //     {.name = "treasure", .level = 0,  .location = {2.5, 5.1, 5.0}, .achieved = false},
+   };
+
+
+      auto to_json(nlohmann::json& j, Target const& t) -> void
+      {
+         j = nlohmann::json{
+            {"name", t.name},
+            {"level", t.level},
+            {"location", t.location},
+            {"achieved", t.achieved}
+         };
+      }
+
+
+    // apertura del Json
+    if (auto ofs = std::ofstream{"Collatz.jsonl", std::ios::binary}) 
+      {
+       for (auto const& target : targets)
+          ofs << nlohmann::json(target) << '\n'; // conversión Target-->json
+      }
+    else
+      {
+       std::cerr << "No se puede crear el fichero\n";
+      }
+
+    while (numero > 1)
+       {
+        if (numero %2 ==0)
+          {
+           numero = numero / 2;
+          }
+        else
+          {
+           numero = 3 * numero + 1;
+          }
+        textBox2.AppendText(Convert.ToString(numero)+ " ");
+       }
+
+        [WebMethod]
+       Public Sub GetDatosJSON(ByValvalor1 As Integer,ByVal valor2 AsInteger)
+       Dim iDatosAs New MisDatos
+       Context.Response.Cache.SetExpires(DateTime.Now.AddHours(-1))
+       Context.Response.ContentType = "application/json"
+       Context.Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(
+                                           iDatos.GetDataSet(valor1,valor2),
+                                           Newtonsoft.Json.Formatting.None))
+       Context.Response.Flush()
+       Context.Response.End()
+       
+       End Sub
+    }
+}
